@@ -1,0 +1,38 @@
+# Linux verification image for the Swift core, the l2dat CLI and the l2encdec helper.
+# Used by scripts/verify-linux.sh; the repo and the fixtures are bind-mounted at run time,
+# never copied into a layer (build context is docker/linux only).
+#
+# Ubuntu 24.04, not Debian 12: the helper's upstream sources include <format> (GCC >= 13).
+ARG SWIFT_IMAGE=swift:6.4.1-noble
+FROM ${SWIFT_IMAGE}
+
+# make/g++: the helper's upstream CMake build (FetchContent needs git, already present).
+# procps: pgrep, used by L2CryptStopTests and the signal check. file: binary sanity output.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends make g++ procps file curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# A fetched dependency (blowfish) requires CMake >= 3.30; noble ships 3.28. Kitware's release
+# tarball, checksum-verified.
+ARG CMAKE_VERSION=4.4.4
+ARG CMAKE_SHA256_X86_64=e5bb807f7728cb60cd8b27ebc97a2edb469b68655f21e844a600c3575b76f5bb
+ARG CMAKE_SHA256_AARCH64=a1b6cc63636a0e55c63257cf3315a8a5f129e42fade25db1afea4ff8ab06f25e
+RUN set -eu; arch="$(uname -m)"; \
+    case "$arch" in x86_64) sum="$CMAKE_SHA256_X86_64" ;; aarch64) sum="$CMAKE_SHA256_AARCH64" ;; \
+        *) echo "unsupported architecture: $arch" >&2; exit 1 ;; esac; \
+    tarball="cmake-${CMAKE_VERSION}-linux-${arch}.tar.gz"; \
+    curl -fsSLo "/tmp/$tarball" "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/$tarball"; \
+    echo "$sum  /tmp/$tarball" | sha256sum -c -; \
+    tar -xzf "/tmp/$tarball" -C /usr/local --strip-components=1; \
+    rm "/tmp/$tarball"; \
+    cmake --version
+
+# Desktop libraries an AppImage expects from the host (the AppImage excludelist: GL/EGL, gbm,
+# drm, Wayland/X11-xcb, ALSA, HarfBuzz, FriBidi), so scripts/make-tauri.sh --linux can run the
+# packaged app's --selftest here, on the oldest glibc the bundled helper supports (2.39).
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libegl1 libgl1 libgbm1 libdrm2 libwayland-client0 \
+        libx11-xcb1 libasound2t64 libharfbuzz0b libfribidi0 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /work

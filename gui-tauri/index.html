@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>L2 File Editor</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header id="toolbar" class="toolbar" role="toolbar" aria-label="File"></header>
+      <main id="workspace" class="workspace">
+        <section id="editor" class="editor" aria-label="Text editor"></section>
+        <div id="splitter" class="splitter" role="separator" aria-orientation="horizontal" aria-label="Resize the program log"></div>
+        <section class="log-section" aria-label="Program Log">
+          <div class="log-title">Program Log</div>
+          <div id="log" class="log" role="log" aria-live="off" tabindex="0"></div>
+        </section>
+      </main>
+      <footer id="statusbar" class="statusbar"></footer>
+    </div>
+    <dialog id="settings" class="dialog" aria-label="Settings"></dialog>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

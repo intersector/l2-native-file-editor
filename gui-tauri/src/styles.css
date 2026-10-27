@@ -1,0 +1,354 @@
+:root {
+  color-scheme: light dark;
+  --ui-font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Cantarell", "Ubuntu", sans-serif;
+  --mono: "SF Mono", Menlo, "DejaVu Sans Mono", "Liberation Mono", Consolas, monospace;
+  --bg: #ecebe8;
+  --toolbar-bg: #f6f5f2;
+  --editor-bg: #ffffff;
+  --gutter-bg: #f7f6f3;
+  --panel-bg: #f3f2ee;
+  --log-bg: #fbfaf7;
+  --text: #1f2328;
+  --muted: #6b6f76;
+  --border: #d5d3cd;
+  --accent: #b03a2e;
+  --accent-text: #ffffff;
+  --active-line: rgba(30, 60, 120, 0.06);
+  --selection: rgba(40, 100, 220, 0.22);
+  --search-match: rgba(255, 196, 0, 0.35);
+  --search-current: rgba(255, 140, 0, 0.55);
+  --log-stdout: #2f3a48;
+  --log-stderr: #8a4b08;
+  --log-error: #b3261e;
+  --log-frame: #1d5a8c;
+  --button-bg: #ffffff;
+  --button-hover: #f0efeb;
+  --log-height: 180px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17191d;
+    --toolbar-bg: #1f2227;
+    --editor-bg: #1b1d21;
+    --gutter-bg: #1f2227;
+    --panel-bg: #23262b;
+    --log-bg: #15171a;
+    --text: #dfe2e6;
+    --muted: #8b9098;
+    --border: #33373e;
+    --accent: #e0675a;
+    --accent-text: #15171a;
+    --active-line: rgba(255, 255, 255, 0.05);
+    --selection: rgba(90, 150, 255, 0.3);
+    --search-match: rgba(255, 196, 0, 0.25);
+    --search-current: rgba(255, 140, 0, 0.45);
+    --log-stdout: #c5ccd6;
+    --log-stderr: #e2a35c;
+    --log-error: #ff8a80;
+    --log-frame: #7fb8e6;
+    --button-bg: #2a2d33;
+    --button-hover: #33373e;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.4 var(--ui-font);
+  overflow: hidden;
+}
+
+#app {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
+  height: 100vh;
+}
+
+button,
+select,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button,
+select {
+  background: var(--button-bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 3px 10px;
+  min-height: 26px;
+}
+
+button:hover:not(:disabled) {
+  background: var(--button-hover);
+}
+
+button:disabled,
+select:disabled {
+  opacity: 0.5;
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 6px 10px;
+  background: var(--toolbar-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbar-group label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+}
+
+.toolbar-group label select {
+  color: var(--text);
+}
+
+.toolbar .chronicle {
+  max-width: 220px;
+}
+
+.toolbar-spacer {
+  flex: 1;
+}
+
+.workspace {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) 5px var(--log-height);
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 0;
+}
+
+.editor {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.splitter {
+  cursor: row-resize;
+  background: var(--border);
+}
+
+.log-section {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 0;
+  background: var(--log-bg);
+}
+
+.log-title {
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.log {
+  overflow: auto;
+  padding: 4px 10px 8px;
+  font: 12px/1.45 var(--mono);
+  white-space: pre;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.log-line.log-stdout,
+.log-line.log-info {
+  color: var(--log-stdout);
+}
+
+.log-line.log-stderr,
+.log-line.log-warning {
+  color: var(--log-stderr);
+}
+
+.log-line.log-error {
+  color: var(--log-error);
+}
+
+.log-line.log-frame {
+  color: var(--log-frame);
+  font-weight: 600;
+}
+
+.statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 26px;
+  padding: 3px 10px;
+  background: var(--toolbar-bg);
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.status-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.status-text,
+.status-error {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-error {
+  color: var(--log-error);
+  font-weight: 600;
+}
+
+.status-right {
+  display: flex;
+  flex: none;
+  gap: 14px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.status-file {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.link-button {
+  border: none;
+  background: none;
+  padding: 0 4px;
+  min-height: 0;
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.spinner {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner[hidden] {
+  display: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s;
+  }
+}
+
+.dialog {
+  width: min(560px, calc(100vw - 32px));
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-bg);
+  color: var(--text);
+}
+
+.dialog::backdrop {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.settings-form {
+  display: grid;
+  gap: 12px;
+  padding: 18px 20px;
+}
+
+.settings-form h2 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+}
+
+.field label {
+  font-weight: 600;
+}
+
+.folder-row {
+  display: flex;
+  gap: 6px;
+}
+
+.folder-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--editor-bg);
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.form-error {
+  margin: 0;
+  color: var(--log-error);
+}
+
+.dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

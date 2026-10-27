@@ -1,0 +1,32 @@
+# Linux build image for the Tauri app (used by a later subtask): Rust + Node + pnpm +
+# tauri-cli and the WebKitGTK/GTK system libraries Tauri v2 needs to build .deb/.AppImage.
+# Bookworm's GCC 12 cannot build the l2encdec helper (<format> needs GCC >= 13): build it in
+# the l2fe-verify image (Dockerfile.verify) and bundle the result.
+ARG NODE_IMAGE=node:24.22.0-bookworm-slim
+ARG RUST_IMAGE=rust:1.99.1-bookworm
+
+FROM ${NODE_IMAGE} AS node
+
+FROM ${RUST_IMAGE}
+ARG PNPM_VERSION=12.14.0
+ARG TAURI_CLI_VERSION=2.12.3
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential pkg-config libssl-dev libxdo-dev \
+        libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libayatana-appindicator3-dev \
+        patchelf file wget curl xdg-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -s ../lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
+    && npm install -g "pnpm@${PNPM_VERSION}" \
+    && npm cache clean --force
+
+RUN cargo install tauri-cli --version "=${TAURI_CLI_VERSION}" --locked \
+    && rm -rf "${CARGO_HOME}/registry" "${CARGO_HOME}/git"
+
+# AppImage tooling is itself an AppImage and needs FUSE, which containers lack.
+ENV APPIMAGE_EXTRACT_AND_RUN=1

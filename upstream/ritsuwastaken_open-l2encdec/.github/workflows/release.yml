@@ -1,0 +1,44 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-2025-vs2026
+            configure_preset: msvc-x86
+            build_preset: msvc-x86-build
+          - os: ubuntu-24.04
+            configure_preset: unix
+            build_preset: unix-build
+          - os: macos-26
+            configure_preset: unix
+            build_preset: unix-build
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Build
+        uses: lukka/run-cmake@v10
+        with:
+          configurePreset: ${{ matrix.configure_preset }}
+          buildPreset: ${{ matrix.build_preset }}
+
+      - name: Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            build_*/l2encdec-*-*.zip

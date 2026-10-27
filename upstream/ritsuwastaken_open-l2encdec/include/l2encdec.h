@@ -1,0 +1,115 @@
+#ifndef L2ENCDEC_PUBLIC_H
+#define L2ENCDEC_PUBLIC_H
+
+#ifndef L2ENCDEC_API
+#define L2ENCDEC_API
+#endif
+
+#include <string>
+#include <vector>
+
+namespace l2encdec
+{
+const int SUPPORTED_PROTOCOLS[] = {111, 120, 121, 211, 212, 411, 412, 413, 414};
+
+enum class Type
+{
+    NONE,
+    XOR,
+    XOR_FILENAME,
+    XOR_POSITION,
+    BLOWFISH,
+    RSA
+};
+
+enum class ChecksumResult
+{
+    SUCCESS = 0,
+    MISMATCH = -1
+};
+
+enum class DecodeResult
+{
+    SUCCESS = 0,
+    INVALID_TYPE = -1,
+    DECOMPRESSION_FAILED = -2,
+    DECRYPTION_FAILED = -3,
+};
+
+enum class EncodeResult
+{
+    SUCCESS = 0,
+    INVALID_TYPE = -1,
+    COMPRESSION_FAILED = -2,
+    ENCRYPTION_FAILED = -3,
+};
+
+struct Params
+{
+    Type type;
+    int protocol;                     // `encrypt`: used for header construction, required if `header` is empty
+    std::string header;               // `decrypt`: expected header, `encrypt`: header to prepend
+    std::string tail;                 // `encode`: custom tail
+    bool skip_tail = false;           // `decrypt`: read file without tail; `encrypt`: do not append tail
+    bool skip_header = false;         // `decrypt`: ignore/prevent header handling; `encrypt`: do not prepend header
+    std::string filename;             // for l2encdec::Type::XOR_FILENAME
+    int xor_key;                      // for l2encdec::Type::XOR
+    int xor_start_position;           // for l2encdec::Type::XOR_POSITION
+    std::string blowfish_key;         // for l2encdec::Type::BLOWFISH
+    std::string rsa_modulus;          // for l2encdec::Type::RSA
+    std::string rsa_public_exponent;  // for l2encdec::Type::RSA, encrypt
+    std::string rsa_private_exponent; // for l2encdec::Type::RSA, decrypt
+};
+
+/**
+ * @brief Initialize default parameters for the specified protocol.
+ * @param params Struct to populate with parameters
+ * @param protocol Last three digits of the file header
+ * @param filename Filename used to calculate the XOR key for protocol 121
+ * @param use_legacy_decrypt_rsa For protocols 411-414, use the original per-protocol RSA modulus and private
+ *        exponent. When false (default), modern RSA parameters are used. Legacy parameters have no public
+ *        exponent and are decrypt-only.
+ * @return `true` if the parameters were initialized successfully, `false` otherwise.
+ */
+L2ENCDEC_API bool init_params(Params &params, int protocol, const std::string &filename = "", bool use_legacy_decrypt_rsa = false);
+
+/**
+ * @brief Verify the checksum of the input data.
+ */
+L2ENCDEC_API ChecksumResult verify_checksum(const std::vector<unsigned char> &input_data);
+
+/**
+ * @brief Encode the input data using params.
+ */
+L2ENCDEC_API EncodeResult encode(const std::vector<unsigned char> &input_data,
+                                 std::vector<unsigned char> &output_data,
+                                 const Params &params);
+
+/**
+ * @brief Decode the input data using params.
+ */
+L2ENCDEC_API DecodeResult decode(const std::vector<unsigned char> &input_data,
+                                 std::vector<unsigned char> &output_data,
+                                 const Params &params);
+
+/**
+ * @brief Decode input data using protocol-derived parameters.
+ */
+L2ENCDEC_API DecodeResult decode(const std::vector<unsigned char> &input,
+                                 std::vector<unsigned char> &output,
+                                 int protocol,
+                                 const std::string &filename = "", // only needed for protocol 121
+                                 bool use_legacy_decrypt_rsa = false);
+
+/**
+ * @brief Encode input data using protocol-derived parameters.
+ * @param use_legacy_decrypt_rsa Ignored for encryption; modern RSA parameters are always used for 411-414.
+ */
+L2ENCDEC_API EncodeResult encode(const std::vector<unsigned char> &input,
+                                 std::vector<unsigned char> &output,
+                                 int protocol,
+                                 const std::string &filename = "", // only used for protocol 121
+                                 bool use_legacy_decrypt_rsa = false);
+} // namespace l2encdec
+
+#endif // L2ENCDEC_PUBLIC_H

@@ -1,0 +1,10 @@
+fixtures/high5/enc/
+fixtures/high5/dec/
+fixtures/high5/txt/
+upstream/*/build_unix/
+upstream/*/build/
+.build
+*.xcodeproj/xcuserdata/
+DerivedData/
+.DS_Store
+build/
