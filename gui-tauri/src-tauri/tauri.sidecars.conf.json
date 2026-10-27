@@ -1,6 +1,10 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "bundle": {
-    "externalBin": ["binaries/l2dat", "binaries/l2encdec"]
+    "externalBin": ["binaries/l2dat", "binaries/l2encdec"],
+    "resources": {
+      "../../LICENSE": "LICENSE.txt",
+      "../../licenses/THIRD_PARTY_LICENSES.txt": "THIRD_PARTY_LICENSES.txt"
+    }
   }
 }

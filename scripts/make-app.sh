@@ -45,6 +45,11 @@ ditto "$BIN_DIR/$RESOURCE_BUNDLE" "$CONTENTS/Resources/$RESOURCE_BUNDLE"
 cp "$HELPER" "$CONTENTS/Helpers/l2encdec"
 chmod 755 "$CONTENTS/Helpers/l2encdec"
 printf 'APPL????' > "$CONTENTS/PkgInfo"
+# Licences: ours and every third-party component compiled into the app and its helper.
+LICENSES="$ROOT/licenses/THIRD_PARTY_LICENSES.txt"
+[[ -f "$LICENSES" ]] || die "$LICENSES missing: run python3 -I scripts/collect-licenses.py"
+cp "$ROOT/LICENSE" "$CONTENTS/Resources/LICENSE.txt"
+cp "$LICENSES" "$CONTENTS/Resources/THIRD_PARTY_LICENSES.txt"
 
 # App icon: the icns shared with the Tauri app (generated from gui-tauri/icons/app-icon-1024.png
 # by scripts/make-tauri.sh) when present; otherwise an optional placeholder drawn with AppKit,

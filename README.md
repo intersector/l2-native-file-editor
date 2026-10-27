@@ -86,7 +86,23 @@ flowchart LR
 - **Edge cases are tested.** Empty wide strings, NaN bounds and oversized counters all have tests,
   on top of the golden corpus.
 
-## Quick start
+## Download
+
+Grab the latest build from **[Releases](https://github.com/intersector/l2-native-file-editor/releases)**.
+
+| Platform | File |
+|---|---|
+| macOS (Apple Silicon), native SwiftUI app | `L2-File-Editor-macOS-arm64.zip` |
+| macOS (Apple Silicon), cross-platform app | `L2-File-Editor-Tauri-macOS-arm64.dmg` |
+| Linux x86_64 | `L2-File-Editor-linux-x86_64.AppImage` · `.deb` · `.rpm` (glibc 2.39+) |
+
+Both macOS apps are called *L2 File Editor*, so install one of them.
+
+> **First launch on macOS:** the apps are not notarized yet, so Gatekeeper blocks them the first
+> time. Open them once, then go to **System Settings → Privacy & Security** and click **Open Anyway**.
+> Or run `xattr -dr com.apple.quarantine "/Applications/L2 File Editor.app"`.
+
+## Build from source
 
 ```sh
 git clone https://github.com/intersector/l2-native-file-editor.git

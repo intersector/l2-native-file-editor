@@ -9,6 +9,18 @@
 getopt implementation under its own license
 ([`cli/extern/getopt/LICENSE`](upstream/ritsuwastaken_open-l2encdec/cli/extern/getopt/LICENSE)).
 
+## Components compiled into the apps
+
+The helper statically links [Mbed TLS](https://github.com/Mbed-TLS/mbedtls) 3.6.7 (Apache-2.0),
+[miniz](https://github.com/richgel999/miniz) 3.1.2 (MIT) and [blowfish](https://github.com/avinal/blowfish)
+(MIT). `l2dat` links [swift-argument-parser](https://github.com/apple/swift-argument-parser) (Apache-2.0), and
+the Tauri app is built from about 400 Rust crates and 16 npm packages under permissive licences (MIT, Apache-2.0,
+BSD, ISC, Zlib, Unicode-3.0) plus 5 unmodified MPL-2.0 crates from Servo.
+
+Every licence text is collected in [`licenses/THIRD_PARTY_LICENSES.txt`](licenses/THIRD_PARTY_LICENSES.txt),
+which ships inside both apps. Regenerate it with `python3 -I scripts/collect-licenses.py` after changing
+dependencies; `--check` reports a stale file.
+
 ## DDF schema definitions
 
 `Sources/L2FileEditorApp/Resources/DAT_defs/` and `fixtures/high5/ddf/` are `.ddf` table schemas for the
